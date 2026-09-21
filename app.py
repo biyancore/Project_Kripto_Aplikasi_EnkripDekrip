@@ -1,10 +1,99 @@
 import streamlit as st
 
-st.set_page_config(page_title="Aplikasi Kriptografi Kelompok", layout="wide")
+# Konfigurasi Halaman Utama
+st.set_page_config(
+    page_title="Aplikasi Kriptografi Kelompok",
+    page_icon="🔐",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Sidebar untuk Navigasi Menu
+# Custom Styling CSS untuk Mempercantik Tampilan UI
+st.markdown("""
+    <style>
+    .main-header {
+        font-size: 2.3rem;
+        color: #1f77b4;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+    }
+    .sub-header {
+        font-size: 1.1rem;
+        color: #666666;
+        margin-bottom: 1.5rem;
+    }
+    .info-box {
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 5px solid #1f77b4;
+        margin-bottom: 20px;
+    }
+    .stAlert {
+        border-radius: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# FUNGSI-FUNGSI UTAMA KRIPTOGRAFI
+# ==========================================
+
+# 1. Caesar Cipher (Placeholder / To-Do)
+def caesar_encrypt(text, shift):
+    return f"[Caesar Encrypted: {text}]"
+
+def caesar_decrypt(text, shift):
+    return f"[Caesar Decrypted: {text}]"
+
+# 2. Rail Fence Cipher (Placeholder / To-Do)
+def rail_fence_encrypt(text, rails):
+    return f"[RailFence Encrypted: {text}]"
+
+def rail_fence_decrypt(ciphertext, rails):
+    return f"[RailFence Decrypted: {ciphertext}]"
+
+# 3. Cipher Aliran / Stream Cipher (Placeholder / To-Do)
+def stream_cipher_process(text, key):
+    return f"[StreamCipher Processed: {text}]"
+
+# 4. Cipher Blok / Block Cipher (Oleh: Biyan)
+def padding_teks(teks, ukuran_blok):
+    sisa = len(teks) % ukuran_blok
+    if sisa != 0:
+        teks = teks + (' ' * (ukuran_blok - sisa))
+    return teks
+
+def block_cipher_encrypt(text, key, ukuran_blok):
+    text_padded = padding_teks(text, ukuran_blok)
+    hasil_ciphertext = ""
+    shift = len(key) % 10 if key else 3
+
+    for i in range(0, len(text_padded), ukuran_blok):
+        blok = text_padded[i:i+ukuran_blok]
+        blok_encrypted = "".join([chr(ord(c) + shift) for c in blok])
+        hasil_ciphertext += blok_encrypted
+        
+    return hasil_ciphertext, shift
+
+def block_cipher_decrypt(ciphertext, key, ukuran_blok):
+    shift = len(key) % 10 if key else 3
+    hasil_plaintext = ""
+
+    for i in range(0, len(ciphertext), ukuran_blok):
+        blok = ciphertext[i:i+ukuran_blok]
+        blok_decrypted = "".join([chr(ord(c) - shift) for c in blok])
+        hasil_plaintext += blok_decrypted
+        
+    return hasil_plaintext.rstrip(), shift
+
+
+# ==========================================
+# SIDEBAR NAVIGATION & IDENTITAS
+# ==========================================
+st.sidebar.markdown("## 🧭 Navigasi Menu")
 menu = st.sidebar.selectbox(
-    "Pilih Menu",
+    "Pilih Menu Algoritma",
     [
         "1. Caesar Cipher",
         "2. Rail Fence",
@@ -14,93 +103,242 @@ menu = st.sidebar.selectbox(
     ],
 )
 
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 👥 Tim Pengembang:")
+st.sidebar.markdown("""
+- **Anin** (Caesar Cipher)
+- **Andini** (Rail Fence)
+- **Alya** (Cipher Aliran)
+- **Biyan** (Briliant Priscilla - 123240068) (Cipher Blok & Integrasi)
+""")
+
 
 # ==========================================
-# MENU 1: CAESAR CIPHER (Tugas: Anin)
+# 1. MENU CAESAR CIPHER (To-Do: Anin)
 # ==========================================
 if menu == "1. Caesar Cipher":
-    st.header("Menu 1: Caesar Cipher")
+    st.markdown('<p class="main-header">🔐 Menu 1: Caesar Cipher</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Algoritma Kriptografi Klasik - Substitusi Karakter</p>', unsafe_allow_html=True)
     st.markdown("*Dikerjakan oleh: Anin*")
 
-    teks_input = st.text_input("Masukkan teks:")
-    geseran = st.number_input("Jumlah Geseran (Shift):", min_value=1, max_value=25, value=3)
-    pilihan_aksi = st.radio("Aksi:", ["Enkripsi", "Dekripsi"])
+    with st.container():
+        st.markdown("""
+        <div class="info-box">
+            <h4>📖 Panduan & Konsep</h4>
+            <p><b>Fungsi:</b> Menggeser setiap huruf dalam teks plaintext sejauh nilai tertentu dalam alfabet.</p>
+            <p><b>Kunci yang Dibutuhkan:</b> Nilai pergeseran (<i>Shift</i> berupa angka).</p>
+            <p><b>Cara Proses:</b> Setiap karakter dicari indeks abjadnya, lalu digeser ke kanan (enkripsi) atau ke kiri (dekripsi) sejumlah nilai shift.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("Proses Caesar"):
-        # TODO: [ANIN] Masukkan logika enkripsi/dekripsi Caesar Cipher di sini
-        # TODO: [ANIN] Tampilkan visualisasi proses langkah demi langkah (gunakan st.expander)
-        st.info("Logika Caesar Cipher oleh Anin belum diimplementasikan.")
+    col1, col2 = st.columns(2, gap="medium")
+    with col1:
+        st.markdown("### 📝 Masukan Pengguna")
+        teks_input = st.text_area("Teks Input:", placeholder="Masukkan teks di sini...", key="caesar_in")
+        geseran = st.number_input("Jumlah Geseran (Shift):", min_value=1, max_value=25, value=3, key="caesar_shift")
+        pilihan_aksi = st.radio("Pilih Aksi:", ["Enkripsi", "Dekripsi"], key="caesar_action")
+        proses_btn = st.button("Proses Caesar Cipher", type="primary", use_container_width=True)
+
+    with col2:
+        st.markdown("### 📊 Hasil & Visualisasi")
+        if proses_btn:
+            # TODO: [ANIN] Masukkan logika enkripsi/dekripsi Caesar Cipher di sini
+            st.info("Logika Caesar Cipher oleh Anin belum diimplementasikan.")
 
 
 # ==========================================
-# MENU 2: RAIL FENCE (Tugas: Andini)
+# 2. MENU RAIL FENCE (To-Do: Andini)
 # ==========================================
 elif menu == "2. Rail Fence":
-    st.header("Menu 2: Rail Fence Cipher")
+    st.markdown('<p class="main-header">🚧 Menu 2: Rail Fence Cipher</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Algoritma Kriptografi Klasik - Transposisi Zig-Zag</p>', unsafe_allow_html=True)
     st.markdown("*Dikerjakan oleh: Andini*")
 
-    teks_input = st.text_input("Masukkan teks:")
-    jumlah_rail = st.number_input("Jumlah Rail:", min_value=2, max_value=5, value=3)
-    pilihan_aksi = st.radio("Aksi:", ["Enkripsi", "Dekripsi"])
+    with st.container():
+        st.markdown("""
+        <div class="info-box">
+            <h4>📖 Panduan & Konsep</h4>
+            <p><b>Fungsi:</b> Mengubah urutan karakter teks dengan menulisnya secara diagonal/zig-zag membentuk pagar (rail).</p>
+            <p><b>Kunci yang Dibutuhkan:</b> Jumlah rail (baris).</p>
+            <p><b>Cara Proses:</b> Karakter ditulis turun-naik sejumlah rail, kemudian dibaca secara mendatar per baris untuk menghasilkan ciphertext.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("Proses Rail Fence"):
-        # TODO: [ANDINI] Masukkan logika enkripsi/dekripsi Rail Fence di sini
-        # TODO: [ANDINI] Tampilkan visualisasi bentuk zigzag/matriks prosesnya
-        st.info("Logika Rail Fence oleh Andini belum diimplementasikan.")
+    col1, col2 = st.columns(2, gap="medium")
+    with col1:
+        st.markdown("### 📝 Masukan Pengguna")
+        teks_input = st.text_area("Teks Input:", placeholder="Masukkan teks di sini...", key="rail_in")
+        jumlah_rail = st.number_input("Jumlah Rail (Baris):", min_value=2, max_value=5, value=3, key="rail_num")
+        pilihan_aksi = st.radio("Pilih Aksi:", ["Enkripsi", "Dekripsi"], key="rail_action")
+        proses_btn = st.button("Proses Rail Fence", type="primary", use_container_width=True)
+
+    with col2:
+        st.markdown("### 📊 Hasil & Visualisasi")
+        if proses_btn:
+            # TODO: [ANDINI] Masukkan logika enkripsi/dekripsi Rail Fence di sini
+            st.info("Logika Rail Fence oleh Andini belum diimplementasikan.")
 
 
 # ==========================================
-# MENU 3: CIPHER ALIRAN (Tugas: Alya)
+# 3. MENU CIPHER ALIRAN (To-Do: Alya)
 # ==========================================
 elif menu == "3. Cipher Aliran":
-    st.header("Menu 3: Cipher Aliran (Stream Cipher)")
+    st.markdown('<p class="main-header">🌊 Menu 3: Cipher Aliran (Stream Cipher)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Algoritma Kriptografi Modern - Enkripsi Bit/Karakter Berbasis Kunci</p>', unsafe_allow_html=True)
     st.markdown("*Dikerjakan oleh: Alya*")
 
-    teks_input = st.text_input("Masukkan teks:")
-    kunci = st.text_input("Masukkan Kunci:")
-    pilihan_aksi = st.radio("Aksi:", ["Enkripsi", "Dekripsi"])
+    with st.container():
+        st.markdown("""
+        <div class="info-box">
+            <h4>📖 Panduan & Konsep</h4>
+            <p><b>Fungsi:</b> Mengenkripsi plaintext dengan menggabungkan karakter teks dan kunci secara berurutan.</p>
+            <p><b>Kunci yang Dibutuhkan:</b> Kata kunci (*Key*).</p>
+            <p><b>Cara Proses:</b> Dilakukan operasi transformasi byte/karakter (seperti XOR) antara teks dan kunci yang berulang mengikuti aliran data.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("Proses Cipher Aliran"):
-        # TODO: [ALYA] Masukkan logika enkripsi/dekripsi Stream Cipher di sini
-        # TODO: [ALYA] Tampilkan tahapan perubahan biner atau proses XOR di st.expander
-        st.info("Logika Cipher Aliran oleh Alya belum diimplementasikan.")
+    col1, col2 = st.columns(2, gap="medium")
+    with col1:
+        st.markdown("### 📝 Masukan Pengguna")
+        teks_input = st.text_area("Teks Input:", placeholder="Masukkan teks di sini...", key="stream_in")
+        kunci = st.text_input("Masukkan Kunci (Key):", placeholder="Kata kunci rahasia...", key="stream_key")
+        pilihan_aksi = st.radio("Pilih Aksi:", ["Enkripsi", "Dekripsi"], key="stream_action")
+        proses_btn = st.button("Proses Cipher Aliran", type="primary", use_container_width=True)
+
+    with col2:
+        st.markdown("### 📊 Hasil & Visualisasi")
+        if proses_btn:
+            # TODO: [ALYA] Masukkan logika enkripsi/dekripsi Stream Cipher di sini
+            st.info("Logika Cipher Aliran oleh Alya belum diimplementasikan.")
 
 
 # ==========================================
-# MENU 4: CIPHER BLOK (Tugas: Biyan)
+# 4. MENU CIPHER BLOK (Biyan)
 # ==========================================
 elif menu == "4. Cipher Blok":
-    st.header("Menu 4: Cipher Blok (Block Cipher)")
-    st.markdown("*Dikerjakan oleh: Biyan*")
+    st.markdown('<p class="main-header">📦 Menu 4: Cipher Blok (Block Cipher)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Algoritma Kriptografi Modern - Transformasi Blok dengan Padding Fleksibel</p>', unsafe_allow_html=True)
+    st.markdown("*Dikerjakan oleh: Briliant Priscilla - 123240068*")
 
-    teks_input = st.text_input("Masukkan teks:")
-    kunci = st.text_input("Masukkan Kunci Blok:")
-    pilihan_aksi = st.radio("Aksi:", ["Enkripsi", "Dekripsi"])
+    with st.container():
+        st.markdown("""
+        <div class="info-box">
+            <h4>📖 Panduan & Konsep</h4>
+            <p><b>Fungsi:</b> Memecah teks menjadi beberapa blok ukuran tetap, lalu mengenkripsi setiap blok secara bersamaan.</p>
+            <p><b>Kunci yang Dibutuhkan:</b> Kata Kunci (menentukan nilai geser *shift*) dan Ukuran Blok fleksibel (karakter per blok).</p>
+            <p><b>Cara Proses:</b> Teks dipadded jika kurang, dipotong per blok, ditransformasikan karakternya berdasarkan kunci, lalu digabungkan kembali.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("Proses Cipher Blok"):
-        # TODO: [BIYAN] Masukkan logika enkripsi/dekripsi Block Cipher di sini
-        # TODO: [BIYAN] Tampilkan proses pembagian blok teksnya
-        st.info("Logika Cipher Blok oleh Biyan belum diimplementasikan.")
+    col1, col2 = st.columns(2, gap="medium")
+    with col1:
+        st.markdown("### 📝 Masukan Pengguna")
+        teks_input = st.text_area("Teks Input:", placeholder="Masukkan teks di sini...", key="teks_blok")
+        kunci = st.text_input("Kunci Blok (Kata/Angka):", placeholder="Kunci rahasia...", key="kunci_blok")
+        ukuran_blok = st.number_input("Pilih Ukuran Blok (Karakter):", min_value=2, max_value=10, value=4, key="ukuran_blok_input")
+        pilihan_aksi = st.radio("Pilih Aksi:", ["Enkripsi", "Dekripsi"], key="aksi_blok")
+        proses_btn = st.button("Jalankan Cipher Blok", type="primary", use_container_width=True)
+
+    with col2:
+        st.markdown("### 📊 Hasil & Visualisasi")
+        if proses_btn:
+            if not teks_input or not kunci:
+                st.warning("Mohon masukkan teks dan kunci terlebih dahulu!")
+            else:
+                if pilihan_aksi == "Enkripsi":
+                    hasil_akhir, shift_val = block_cipher_encrypt(teks_input, kunci, int(ukuran_blok))
+                    st.success("Enkripsi Blok Berhasil!")
+                    st.markdown(f"**Hasil Ciphertext:**")
+                    st.code(hasil_akhir)
+                    
+                    with st.expander("🔍 Lihat Proses Langkah demi Langkah (Enkripsi)"):
+                        text_padded = padding_teks(teks_input, int(ukuran_blok))
+                        st.write(f"1. **Ukuran Blok:** {ukuran_blok} karakter")
+                        st.write(f"2. **Nilai Geser (Shift dari Kunci):** {shift_val}")
+                        st.write("3. **Transformasi per Blok:**")
+                        for i in range(0, len(text_padded), int(ukuran_blok)):
+                            b = text_padded[i:i+int(ukuran_blok)]
+                            encrypted_b = "".join([chr(ord(c) + shift_val) for c in b])
+                            st.code(f"Blok '{b}'  -->  '{encrypted_b}'")
+                else:
+                    hasil_akhir, shift_val = block_cipher_decrypt(teks_input, kunci, int(ukuran_blok))
+                    st.success("Dekripsi Blok Berhasil!")
+                    st.markdown(f"**Hasil Plaintext:**")
+                    st.code(hasil_akhir)
+                    
+                    with st.expander("🔍 Lihat Proses Langkah demi Langkah (Dekripsi)"):
+                        st.write(f"1. **Ukuran Blok:** {ukuran_blok} karakter")
+                        st.write(f"2. **Nilai Geser (Shift dari Kunci):** {shift_val}")
+                        st.write("3. **Pemulihan per Blok:**")
+                        for i in range(0, len(teks_input), int(ukuran_blok)):
+                            b = teks_input[i:i+int(ukuran_blok)]
+                            decrypted_b = "".join([chr(ord(c) - shift_val) for c in b])
+                            st.code(f"Blok '{b}'  -->  '{decrypted_b}'")
 
 
 # ==========================================
-# MENU 5: SUPER ENKRIPSI FLEKSIBEL (Integrasi)
+# 5. MENU SUPER ENKRIPSI FLEKSIBEL (Integrasi)
 # ==========================================
 elif menu == "5. Super Enkripsi Fleksibel":
-    st.header("Menu 5: Super Enkripsi Fleksibel")
-    st.markdown("*Dikerjakan bersama (Integrasi)*")
+    st.markdown('<p class="main-header">⚡ Menu 5: Super Enkripsi Fleksibel</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Rantai Kombinasi Berurutan dari Berbagai Metode Kriptografi</p>', unsafe_allow_html=True)
+    st.markdown("*Dikerjakan bersama (Integrasi Kelompok)*")
 
-    jumlah_kombinasi = st.slider("Pilih jumlah metode yang dikombinasikan:", 2, 4, 3)
+    with st.container():
+        st.markdown("""
+        <div class="info-box">
+            <h4>📖 Panduan & Konsep Super Enkripsi</h4>
+            <p><b>Fungsi:</b> Menggabungkan beberapa metode enkripsi secara berurutan (chained encryption) untuk meningkatkan keamanan.</p>
+            <p><b>Konfigurasi:</b> Tentukan jumlah rantai kombinasi (2 s.d. 4 metode), urutan metodenya, serta parameter kunci pendukung di panel sebelah kiri.</p>
+            <p><b>Cara Proses:</b> Output dari algoritma pertama akan langsung menjadi input untuk algoritma berikutnya sampai tahap akhir.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    jumlah_kombinasi = st.slider("Pilih jumlah metode yang dikombinasikan dalam rantai:", min_value=2, max_value=4, value=3)
     
     pilihan_metode = []
-    opsi_tersedia = ["Caesar", "Rail Fence", "Cipher Aliran", "Cipher Blok"]
+    opsi_tersedia = ["Caesar Cipher", "Rail Fence", "Cipher Aliran", "Cipher Blok"]
     
-    for i in range(jumlah_kombinasi):
-        pilih = st.selectbox(f"Urutan ke-{i+1}:", opsi_tersedia, key=f"super_{i}")
-        pilihan_metode.append(pilih)
+    col_config, col_main = st.columns([1, 1], gap="medium")
+    
+    with col_config:
+        st.markdown("### ⚙️ Pengaturan Rantai Metode")
+        for i in range(jumlah_kombinasi):
+            pilih = st.selectbox(f"Urutan Algoritma ke-{i+1}:", opsi_tersedia, key=f"super_{i}")
+            pilihan_metode.append(pilih)
+            
+        st.markdown("---")
+        st.markdown("### 🔑 Parameter Pendukung")
+        teks_super = st.text_area("Teks Awal (Plaintext):", placeholder="Teks yang akan di-super enkripsi...", key="text_super_in")
+        kunci_super = st.text_input("Kunci Universal (Stream/Blok):", value="kunci123", key="key_super_in")
+        geser_super = st.number_input("Nilai Caesar Shift:", value=3, key="shift_super_in")
+        rail_super = st.number_input("Jumlah Rail Fence:", value=3, key="rail_super_in")
+        blok_super = st.number_input("Ukuran Blok:", value=4, key="blok_super_in")
+        
+        jalankan_btn = st.button("Jalankan Super Enkripsi Berantai", type="primary", use_container_width=True)
 
-    teks_super = st.text_area("Masukkan teks untuk Super Enkripsi:")
-
-    if st.button("Jalankan Super Enkripsi"):
-        # TODO: [BIYAN & TIM] Hubungkan fungsi dari Menu 1, 2, 3, dan 4 secara berurutan di sini!
-        st.info("Logika Super Enkripsi berantai belum diimplementasikan.")
+    with col_main:
+        st.markdown("### 🔄 Alur & Hasil Rantai Enkripsi")
+        if jalankan_btn:
+            if not teks_super:
+                st.warning("Mohon masukkan teks awal terlebih dahulu!")
+            else:
+                current_text = teks_super
+                
+                for idx, metode in enumerate(pilihan_metode):
+                    if metode == "Caesar Cipher":
+                        current_text = caesar_encrypt(current_text, int(geser_super))
+                    elif metode == "Rail Fence":
+                        current_text = rail_fence_encrypt(current_text, int(rail_super))
+                    elif metode == "Cipher Aliran":
+                        current_text = stream_cipher_process(current_text, kunci_super)
+                    elif metode == "Cipher Blok":
+                        current_text, _ = block_cipher_encrypt(current_text, kunci_super, int(blok_super))
+                        
+                    with st.expander(f"Tahap {idx+1}: {metode}", expanded=True):
+                        st.write(f"Hasil sementara setelah melalui **{metode}**:")
+                        st.code(current_text)
+                        
+                st.success("Super Enkripsi Selesai Dilakukan!")
+                st.markdown(f"**Ciphertext Akhir (Super Enkripsi):**")
+                st.code(current_text)
