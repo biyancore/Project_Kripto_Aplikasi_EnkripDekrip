@@ -1,4 +1,9 @@
 import streamlit as st
+from Metode.rail_fence import (
+    encrypt_rail_fence,
+    decrypt_rail_fence,
+    highlight_zigzag,
+)
 
 # Konfigurasi Halaman Utama
 st.set_page_config(
@@ -46,12 +51,7 @@ def caesar_encrypt(text, shift):
 def caesar_decrypt(text, shift):
     return f"[Caesar Decrypted: {text}]"
 
-# 2. Rail Fence Cipher (Placeholder / To-Do)
-def rail_fence_encrypt(text, rails):
-    return f"[RailFence Encrypted: {text}]"
-
-def rail_fence_decrypt(ciphertext, rails):
-    return f"[RailFence Decrypted: {ciphertext}]"
+# 2. Rail Fence Cipher — logika asli di-import dari Metode/rail_fence.py (lihat atas)
 
 # 3. Cipher Aliran / Stream Cipher (Placeholder / To-Do)
 def stream_cipher_process(text, key):
@@ -155,62 +155,9 @@ elif menu == "2. Rail Fence":
     import time
     import pandas as pd
 
-    # ==========================================
-    # HELPER LOGIC RAIL FENCE 
-    # ==========================================
-    def encrypt_rail_fence(text, rails):
-        if rails <= 1 or not text:
-            return text, []
-        matrix = [["." for _ in range(len(text))] for _ in range(rails)]
-        row, direction = 0, 1
-        for col, char in enumerate(text):
-            matrix[row][col] = char
-            if row == 0:
-                direction = 1
-            elif row == rails - 1:
-                direction = -1
-            row += direction
-        ciphertext = "".join(
-            ["".join([cell for cell in row if cell != "."]) for row in matrix]
-        )
-        return ciphertext, matrix
-
-    def decrypt_rail_fence(ciphertext, rails):
-        if rails <= 1 or not ciphertext:
-            return ciphertext, []
-        matrix = [["." for _ in range(len(ciphertext))] for _ in range(rails)]
-        row, direction = 0, 1
-        for col in range(len(ciphertext)):
-            matrix[row][col] = "*"
-            if row == 0:
-                direction = 1
-            elif row == rails - 1:
-                direction = -1
-            row += direction
-
-        index = 0
-        for r in range(rails):
-            for c in range(len(ciphertext)):
-                if matrix[r][c] == "*" and index < len(ciphertext):
-                    matrix[r][c] = ciphertext[index]
-                    index += 1
-
-        plaintext = []
-        row, direction = 0, 1
-        for col in range(len(ciphertext)):
-            plaintext.append(matrix[row][col])
-            if row == 0:
-                direction = 1
-            elif row == rails - 1:
-                direction = -1
-            row += direction
-        return "".join(plaintext), matrix
-
-    # Kustomisasi warna matriks menggunakan CSS inline statis murni
-    def highlight_zigzag(val):
-        if val != ".":
-            return "background-color: #2980b9; color: #ffffff; font-weight: bold; text-align: center; border: 1px solid #3498db;"
-        return "color: #bdc3c7; text-align: center; border: 1px dashed #ecf0f1; background-color: #fafbfc;"
+    # Logika Rail Fence (encrypt_rail_fence, decrypt_rail_fence, highlight_zigzag)
+    # sekarang di-import dari Metode/rail_fence.py di bagian atas file —
+    # tidak didefinisikan ulang di sini supaya tidak ada duplikasi kode.
 
     # 2. Kustomisasi UI dengan CSS Murni & Statis
     st.markdown('''
@@ -325,8 +272,11 @@ elif menu == "2. Rail Fence":
                     columns=[f"P-{c+1}" for c in range(len(teks_input))]
                 )
                 
+                styler = df.style
+                # Styler.map baru ada di pandas >= 2.1; fallback ke applymap di versi lebih lama
+                style_func = styler.map if hasattr(styler, "map") else styler.applymap
                 st.dataframe(
-                    df.style.map(highlight_zigzag),
+                    style_func(highlight_zigzag),
                     use_container_width=True
                 )
                 
@@ -485,7 +435,7 @@ elif menu == "5. Super Enkripsi Fleksibel":
                     if metode == "Caesar Cipher":
                         current_text = caesar_encrypt(current_text, int(geser_super))
                     elif metode == "Rail Fence":
-                        current_text = rail_fence_encrypt(current_text, int(rail_super))
+                        current_text, _ = encrypt_rail_fence(current_text, int(rail_super))
                     elif metode == "Cipher Aliran":
                         current_text = stream_cipher_process(current_text, kunci_super)
                     elif metode == "Cipher Blok":
