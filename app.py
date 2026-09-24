@@ -1,18 +1,9 @@
 import streamlit as st
-
-# Import fungsi dari folder Metode (pastikan nama folder dan file sesuai)
-from Metode.blok_chiper import block_cipher_encrypt, block_cipher_decrypt, padding_teks
-
-# Placeholder untuk fungsi teman kelompok (akan diisi nanti oleh Anin, Andini, Alya)
-def caesar_encrypt(text, shift):
-    return f"[Caesar Encrypted: {text}]"
-
-def rail_fence_encrypt(text, rails):
-    return f"[RailFence Encrypted: {text}]"
-
-def stream_cipher_process(text, key):
-    return f"[StreamCipher Processed: {text}]"
-
+from Metode.rail_fence import (
+    encrypt_rail_fence,
+    decrypt_rail_fence,
+    highlight_zigzag,
+)
 
 # Konfigurasi Halaman Utama
 st.set_page_config(
@@ -48,6 +39,54 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# ==========================================
+# FUNGSI-FUNGSI UTAMA KRIPTOGRAFI
+# ==========================================
+
+# 1. Caesar Cipher (Placeholder / To-Do)
+def caesar_encrypt(text, shift):
+    return f"[Caesar Encrypted: {text}]"
+
+def caesar_decrypt(text, shift):
+    return f"[Caesar Decrypted: {text}]"
+
+# 2. Rail Fence Cipher — logika asli di-import dari Metode/rail_fence.py (lihat atas)
+
+# 3. Cipher Aliran / Stream Cipher (Placeholder / To-Do)
+def stream_cipher_process(text, key):
+    return f"[StreamCipher Processed: {text}]"
+
+# 4. Cipher Blok / Block Cipher (Oleh: Biyan)
+def padding_teks(teks, ukuran_blok):
+    sisa = len(teks) % ukuran_blok
+    if sisa != 0:
+        teks = teks + (' ' * (ukuran_blok - sisa))
+    return teks
+
+def block_cipher_encrypt(text, key, ukuran_blok):
+    text_padded = padding_teks(text, ukuran_blok)
+    hasil_ciphertext = ""
+    shift = len(key) % 10 if key else 3
+
+    for i in range(0, len(text_padded), ukuran_blok):
+        blok = text_padded[i:i+ukuran_blok]
+        blok_encrypted = "".join([chr(ord(c) + shift) for c in blok])
+        hasil_ciphertext += blok_encrypted
+        
+    return hasil_ciphertext, shift
+
+def block_cipher_decrypt(ciphertext, key, ukuran_blok):
+    shift = len(key) % 10 if key else 3
+    hasil_plaintext = ""
+
+    for i in range(0, len(ciphertext), ukuran_blok):
+        blok = ciphertext[i:i+ukuran_blok]
+        blok_decrypted = "".join([chr(ord(c) - shift) for c in blok])
+        hasil_plaintext += blok_decrypted
+        
+    return hasil_plaintext.rstrip(), shift
+
 
 # ==========================================
 # SIDEBAR NAVIGATION & IDENTITAS
@@ -107,30 +146,140 @@ if menu == "1. Caesar Cipher":
 # 2. MENU RAIL FENCE (To-Do: Andini)
 # ==========================================
 elif menu == "2. Rail Fence":
-    st.markdown('<p class="main-header">🚧 Menu 2: Rail Fence Cipher</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Algoritma Kriptografi Klasik - Transposisi Zig-Zag</p>', unsafe_allow_html=True)
-    st.markdown("*Dikerjakan oleh: Andini*")
+    
+    # 1. Import khusus untuk modul Andini
+    import time
+    import pandas as pd
 
-    with st.container():
-        st.markdown("""
-        <div class="info-box">
-            <h4>📖 Panduan & Konsep</h4>
-            <p><b>Fungsi:</b> Mengubah urutan karakter teks dengan menulisnya secara diagonal/zig-zag.</p>
-            <p><b>Kunci yang Dibutuhkan:</b> Jumlah rail (baris).</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Logika Rail Fence (encrypt_rail_fence, decrypt_rail_fence, highlight_zigzag)
+    # sekarang di-import dari Metode/rail_fence.py di bagian atas file —
+    # tidak didefinisikan ulang di sini supaya tidak ada duplikasi kode.
 
-    col1, col2 = st.columns(2, gap="medium")
+    # 2. Kustomisasi UI dengan CSS Murni & Statis
+    st.markdown('''
+    <style>
+    .header-box {
+        background-color: #2c3e50;
+        padding: 20px;
+        border-radius: 8px;
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 25px;
+        border-bottom: 5px solid #e74c3c;
+    }
+    .header-title {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+    .header-subtitle {
+        margin: 5px 0 0 0;
+        font-size: 16px;
+        color: #1abc9c;
+    }
+    .result-container {
+        background-color: #ecf0f1;
+        border-left: 6px solid #e74c3c;
+        padding: 15px 20px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border-radius: 0px 8px 8px 0px;
+    }
+    .result-text {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        letter-spacing: 3px;
+        margin: 0;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
+
+    # 3. Header Spektakuler
+    st.markdown('''
+    <div class="header-box">
+        <h1 class="header-title">🎢 Algoritma Rail Fence</h1>
+        <p class="header-subtitle">Modul Kriptografi Transposisi | Enginer: Andini</p>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    # 4. Interaksi Layout & Input
+    col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        teks_input = st.text_input("Teks Input:", key="rail_in")
-        jumlah_rail = st.number_input("Jumlah Rail (Baris):", min_value=2, max_value=5, value=3, key="rail_num")
-        pilihan_aksi = st.radio("Pilih Aksi:", ["Enkripsi", "Dekripsi"], key="rail_action")
-        proses_btn = st.button("Proses Rail Fence", type="primary", use_container_width=True)
-
+        teks_input = st.text_input("Teks Pesan:", value="TEKNIK INFORMATIKA", help="Masukkan teks yang ingin diproses tanpa karakter spesial")
     with col2:
-        if proses_btn:
-            st.info("Logika Rail Fence oleh Andini belum diimplementasikan.")
+        jumlah_rail = st.number_input("Kedalaman Rail:", min_value=2, max_value=20, value=3)
+    with col3:
+        pilihan_aksi = st.selectbox("Operasi:", ["Enkripsi", "Dekripsi"])
 
+    btn_proses = st.button("⚡ Eksekusi Algoritma", use_container_width=True)
+    st.markdown("---")
+
+    # 5. Logika Proses dengan Efek Animasi
+    if btn_proses:
+        teks_input = teks_input.upper().replace(" ", "")
+        
+        if not teks_input:
+            st.error("⚠️ Input tidak valid! Masukkan huruf/angka.")
+        else:
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            for i in range(100):
+                time.sleep(0.01)
+                progress_bar.progress(i + 1)
+                status_text.text(f"Mengkalkulasi rute zigzag... {i+1}%")
+            
+            status_text.empty()
+            progress_bar.empty()
+
+            if pilihan_aksi == "Enkripsi":
+                hasil, matriks = encrypt_rail_fence(teks_input, jumlah_rail)
+                label_hasil = "Cipherteks (Teks Tersandi)"
+            else:
+                hasil, matriks = decrypt_rail_fence(teks_input, jumlah_rail)
+                label_hasil = "Plainteks (Teks Asli)"
+
+            # 6. Output Hasil Kustom
+            st.success("✅ Operasi Kriptografi Berhasil Diselesaikan!")
+            st.markdown(f"**{label_hasil}:**")
+            st.markdown(f'''
+            <div class="result-container">
+                <p class="result-text">{hasil}</p>
+            </div>
+            ''', unsafe_allow_html=True)
+
+            st.download_button(
+                label="📥 Unduh Hasil txt",
+                data=hasil,
+                file_name=f"hasil_{pilihan_aksi.lower()}_railfence.txt",
+                mime="text/plain"
+            )
+
+            # 7. Visualisasi Data Rapi dalam Expander
+            with st.expander("👁️‍🗨️ Analisis Visual Matriks Transposisi", expanded=True):
+                st.write(f"Distribusi **{len(teks_input)} karakter** pada matriks **{jumlah_rail} baris**:")
+                
+                df = pd.DataFrame(
+                    matriks,
+                    index=[f"Rail {i+1}" for i in range(jumlah_rail)],
+                    columns=[f"P-{c+1}" for c in range(len(teks_input))]
+                )
+                
+                styler = df.style
+                # Styler.map baru ada di pandas >= 2.1; fallback ke applymap di versi lebih lama
+                style_func = styler.map if hasattr(styler, "map") else styler.applymap
+                st.dataframe(
+                    style_func(highlight_zigzag),
+                    use_container_width=True
+                )
+                
+                if pilihan_aksi == "Enkripsi":
+                    st.caption("🔍 **Insight Enkripsi:** Teks ditulis meliuk dari atas ke bawah, lalu dibaca mendatar dari Rail 1 hingga rail terakhir untuk membentuk Cipherteks.")
+                else:
+                    st.caption("🔍 **Insight Dekripsi:** Pola pagar kosong dibuat terlebih dahulu, lalu diisi oleh Cipherteks secara horizontal. Plainteks dikembalikan dengan membaca jalurnya secara meliuk.")
 
 # ==========================================
 # 3. MENU CIPHER ALIRAN (To-Do: Alya)
@@ -273,7 +422,7 @@ elif menu == "5. Super Enkripsi Fleksibel":
                     if metode == "Caesar Cipher":
                         current_text = caesar_encrypt(current_text, int(geser_super))
                     elif metode == "Rail Fence":
-                        current_text = rail_fence_encrypt(current_text, int(rail_super))
+                        current_text, _ = encrypt_rail_fence(current_text, int(rail_super))
                     elif metode == "Cipher Aliran":
                         current_text = stream_cipher_process(current_text, kunci_super)
                     elif metode == "Cipher Blok":
