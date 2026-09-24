@@ -1,30 +1,48 @@
-# Metode/blok_chiper.py
+# Metode/blok_cipher.py
 
-def padding_teks(teks, ukuran_blok):
-    sisa = len(teks) % ukuran_blok
-    if sisa != 0:
-        teks = teks + (' ' * (ukuran_blok - sisa))
-    return teks
+def pad_bytes(data: bytes, block_size: int) -> bytes:
+    # Menggunakan standar PKCS#7 Padding modern
+    pad_len = block_size - (len(data) % block_size)
+    return data + bytes([pad_len] * pad_len)
 
-def block_cipher_encrypt(text, key, ukuran_blok):
-    text_padded = padding_teks(text, ukuran_blok)
-    hasil_ciphertext = ""
-    shift = len(key) % 10 if key else 3
+def unpad_bytes(data: bytes) -> bytes:
+    pad_len = data[-1]
+    return data[:-pad_len]
 
-    for i in range(0, len(text_padded), ukuran_blok):
-        blok = text_padded[i:i+ukuran_blok]
-        blok_encrypted = "".join([chr(ord(c) + shift) for c in blok])
-        hasil_ciphertext += blok_encrypted
+def siapkan_kunci_bytes(key: str, block_size: int) -> bytes:
+    key_bytes = key.encode('utf-8') if key else b"KUNCI"
+    # Mengulang/memotong bit kunci agar panjangnya sama persis dengan blok
+    return (key_bytes * ((block_size // len(key_bytes)) + 1))[:block_size]
+
+def block_cipher_encrypt(text: str, key: str, block_size: int):
+    text_bytes = text.encode('utf-8')
+    padded_data = pad_bytes(text_bytes, block_size)
+    key_block = siapkan_kunci_bytes(key, block_size)
+    
+    ciphertext_bytes = bytearray()
+    
+    for i in range(0, len(padded_data), block_size):
+        blok = padded_data[i:i+block_size]
+        # Operasi XOR (^) bit per bit antara plainteks dan kunci
+        encrypted_block = bytearray(b ^ k for b, k in zip(blok, key_block))
+        ciphertext_bytes.extend(encrypted_block)
         
-    return hasil_ciphertext, shift
+    # Mengembalikan hasil dalam format Heksadesimal agar bersih dari simbol aneh
+    return ciphertext_bytes.hex().upper(), key_block
 
-def block_cipher_decrypt(ciphertext, key, ukuran_blok):
-    shift = len(key) % 10 if key else 3
-    hasil_plaintext = ""
-
-    for i in range(0, len(ciphertext), ukuran_blok):
-        blok = ciphertext[i:i+ukuran_blok]
-        blok_decrypted = "".join([chr(ord(c) - shift) for c in blok])
-        hasil_plaintext += blok_decrypted
+def block_cipher_decrypt(hex_ciphertext: str, key: str, block_size: int):
+    # Mengubah Heksadesimal kembali menjadi susunan bit
+    ciphertext_bytes = bytes.fromhex(hex_ciphertext)
+    key_block = siapkan_kunci_bytes(key, block_size)
+    
+    plaintext_bytes = bytearray()
+    
+    for i in range(0, len(ciphertext_bytes), block_size):
+        blok = ciphertext_bytes[i:i+block_size]
+        # Operasi XOR (^) bit per bit untuk mengembalikan data
+        decrypted_block = bytearray(b ^ k for b, k in zip(blok, key_block))
+        plaintext_bytes.extend(decrypted_block)
         
-    return hasil_plaintext.rstrip(), shift
+    # Membuang padding dan mengubah bit kembali menjadi teks
+    unpadded_data = unpad_bytes(plaintext_bytes)
+    return unpadded_data.decode('utf-8'), key_block
