@@ -16,7 +16,11 @@ from Metode.rail_fence import (
     highlight_zigzag,
 )
 
-from Metode.stream_chiper import aliran_chiper
+from Metode.stream_chiper import (
+    stream_cipher_process,
+    stream_cipher_encrypt,
+    stream_cipher_decrypt,
+)
 
 from Metode.blok_chiper import (
     block_cipher_encrypt,
@@ -445,17 +449,17 @@ elif menu == "3. Stream Cipher":
             if not teks_input:
                 st.warning("Mohon masukkan teks terlebih dahulu.")
             else:
-                # Sesuai modul stream_chiper.py:
-                # fungsi yang sama digunakan untuk enkripsi dan dekripsi.
-                hasil = aliran_chiper(
-                    teks_input,
-                    int(kunci_stream),
-                    pilihan_aksi.lower(),
-                )
+                if pilihan_aksi == "Enkripsi":
+                    hasil, teks_langkah = stream_cipher_encrypt(teks_input, int(kunci_stream))
+                else:
+                    hasil, teks_langkah = stream_cipher_decrypt(teks_input, int(kunci_stream))
 
                 st.success(f"{pilihan_aksi} berhasil!")
                 st.markdown("**Hasil:**")
                 st.code(hasil)
+
+                with st.expander("🔍 Lihat Detail Proses XOR"):
+                    st.code(teks_langkah)
 
                 st.download_button(
                     "📥 Unduh Hasil",
@@ -811,10 +815,17 @@ elif menu == "5. Super Enkripsi Fleksibel":
                             # 3. STREAM CIPHER
                             # --------------------------------------------------------
                             elif metode == "Stream Cipher":
-                                current_text = aliran_chiper(current_text, key_stream, pilihan_aksi.lower())
+                                if pilihan_aksi == "Enkripsi":
+                                    current_text, teks_langkah = stream_cipher_encrypt(current_text, key_stream)
+                                else:
+                                    current_text, teks_langkah = stream_cipher_decrypt(current_text, key_stream)
+                                
                                 st.write(f"Hasil setelah melalui **{metode}**:")
                                 st.code(current_text, language="plaintext")
                                 st.info(f"🔍 Diproses menggunakan keystream pseudo-random dengan seed '{key_stream}'.")
+
+                                st.markdown(f"**🔍 Detail Proses {metode}:**")
+                                st.code(teks_langkah, language="plaintext")
 
                             # --------------------------------------------------------
                             # 4. BLOCK CIPHER
