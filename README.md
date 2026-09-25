@@ -67,4 +67,3 @@ Proyek ini dikerjakan secara kolaboratif oleh tim kami:
 * **Integrasi Kelompok** — *Pengembangan UI Streamlit dan Logika Super Enkripsi*
 
 ---
-*Dibuat untuk keperluan edukasi dan praktikum Kriptografi.*
