@@ -714,8 +714,6 @@ elif menu == "5. Super Enkripsi Fleksibel":
 
         geser_super = st.number_input(
             "Nilai Caesar Shift:",
-            min_value=1,
-            max_value=25,
             value=3,
             step=1,
             key="shift_super_in",
