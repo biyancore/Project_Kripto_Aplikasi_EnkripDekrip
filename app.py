@@ -142,7 +142,7 @@ if menu == "1. Caesar Cipher":
         <div class="info-box">
             <h4>📖 Panduan & Konsep</h4>
             <p><b>Fungsi:</b> Menggeser setiap huruf dalam teks berdasarkan nilai shift.</p>
-            <p><b>Kunci:</b> Nilai pergeseran berupa angka 1-25.</p>
+            <p><b>Kunci:</b> Nilai pergeseran berupa angka 1-25. Apabila lebih dari 25, maka akan kembali ke awal.</p>
             <p>Huruf besar dan kecil dipertahankan. Spasi, angka, dan simbol tidak berubah.</p>
         </div>
         """,
@@ -159,8 +159,6 @@ if menu == "1. Caesar Cipher":
         )
         geseran = st.number_input(
             "Jumlah Geseran (Shift):",
-            min_value=1,
-            max_value=25,
             value=3,
             key="caesar_shift",
         )
