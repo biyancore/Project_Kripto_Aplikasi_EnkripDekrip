@@ -635,7 +635,7 @@ elif menu == "4. Block Cipher":
                         st.error("Format input salah! Untuk dekripsi, input harus berupa kode Heksadesimal valid tanpa spasi.")
                         
 # ============================================================
-# MENU 5 — SUPER ENKRIPSI
+# MENU 5 — SUPER ENKRIPSI FLEKSIBEL
 # ============================================================
 elif menu == "5. Super Enkripsi Fleksibel":
     st.markdown(
@@ -643,7 +643,7 @@ elif menu == "5. Super Enkripsi Fleksibel":
         unsafe_allow_html=True,
     )
     st.markdown(
-        '<p class="sub-header">Rantai kombinasi dari metode kriptografi yang tersedia</p>',
+        '<p class="sub-header">Rantai kombinasi metode kriptografi dengan parameter mandiri tiap tahap</p>',
         unsafe_allow_html=True,
     )
     st.markdown("*Dikerjakan bersama (Integrasi Kelompok)*")
@@ -652,20 +652,19 @@ elif menu == "5. Super Enkripsi Fleksibel":
         """
         <div class="info-box">
             <h4>📖 Panduan & Konsep Super Enkripsi</h4>
-            <p>Beberapa metode dijalankan secara berurutan.
-            Output dari satu metode menjadi input metode berikutnya.</p>
-            <p>Super enkripsi menggunakan fungsi metode yang sama dengan
-            menu masing-masing.</p>
+            <p>Setiap tahap metode memiliki parameternya sendiri (seperti menu per-metode). 
+            Output dari satu tahap otomatis menjadi input untuk tahap berikutnya.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
     jumlah_kombinasi = st.slider(
-    "Pilih jumlah metode yang dikombinasikan dalam rantai:",
-    min_value=2,
-    max_value=4,
-    value=3,
+        "Pilih jumlah metode yang dikombinasikan dalam rantai:",
+        min_value=2,
+        max_value=4,
+        value=3,
+        key="super_jumlah_kombinasi"
     )
 
     opsi_tersedia = [
@@ -675,66 +674,74 @@ elif menu == "5. Super Enkripsi Fleksibel":
         "Block Cipher",
     ]
 
-    pilihan_metode = []
-
     col_config, col_main = st.columns([1, 1], gap="medium")
 
+    chain_config = []
+
     with col_config:
-        st.markdown("### ⚙️ Pengaturan Rantai Metode")
+        st.markdown("### ⚙️ Konfigurasi Rantai & Parameter per Tahap")
 
         for i in range(jumlah_kombinasi):
-            pilih = st.selectbox(
-                f"Urutan Algoritma ke-{i + 1}:",
-                opsi_tersedia,
-                key=f"super_method_{i}",
-            )
-            pilihan_metode.append(pilih)
+            with st.expander(f"Tahap Algoritma ke-{i + 1}", expanded=True):
+                metode = st.selectbox(
+                    f"Pilih Metode {i + 1}:",
+                    opsi_tersedia,
+                    key=f"super_method_{i}",
+                )
+                
+                param = {}
+                if metode == "Caesar Cipher":
+                    param["shift"] = st.number_input(
+                        "Jumlah Geseran (Shift):",
+                        value=3,
+                        key=f"super_shift_{i}"
+                    )
+                elif metode == "Rail Fence":
+                    param["rails"] = st.number_input(
+                        "Kedalaman Rail:",
+                        min_value=2,
+                        max_value=20,
+                        value=3,
+                        step=1,
+                        key=f"super_rails_{i}"
+                    )
+                elif metode == "Stream Cipher":
+                    param["key"] = st.number_input(
+                        "Kunci Stream (Angka):",
+                        min_value=0,
+                        value=123,
+                        step=1,
+                        key=f"super_stream_key_{i}"
+                    )
+                elif metode == "Block Cipher":
+                    param["key"] = st.text_input(
+                        "Kunci Blok (Kata):",
+                        value="KUNCI",
+                        key=f"super_block_key_{i}"
+                    )
+                    param["block_size"] = st.number_input(
+                        "Ukuran Blok (Bytes):",
+                        min_value=2,
+                        max_value=16,
+                        value=4,
+                        step=1,
+                        key=f"super_block_size_{i}"
+                    )
+                
+                chain_config.append({"metode": metode, "param": param})
 
         st.markdown("---")
-        st.markdown("### 🔑 Parameter Pendukung")
-
         pilihan_aksi = st.radio(
             "Pilih Aksi Super Enkripsi:",
             ["Enkripsi", "Dekripsi"],
             horizontal=True,
+            key="super_pilihan_aksi"
         )
 
         teks_super = st.text_area(
             "Teks Awal:",
             placeholder="Masukkan plaintext atau ciphertext...",
             key="text_super_in",
-        )
-
-        kunci_super = st.text_input(
-            "Kunci Universal (Stream/Blok):",
-            value="123",
-            key="key_super_in",
-            help="Stream Cipher membutuhkan kunci berupa angka.",
-        )
-
-        geser_super = st.number_input(
-            "Nilai Caesar Shift:",
-            value=3,
-            step=1,
-            key="shift_super_in",
-        )
-
-        rail_super = st.number_input(
-            "Jumlah Rail Fence:",
-            min_value=2,
-            max_value=20,
-            value=3,
-            step=1,
-            key="rail_super_in",
-        )
-
-        blok_super = st.number_input(
-            "Ukuran Blok (Bytes):",
-            min_value=2,
-            max_value=16,
-            value=4,
-            step=1,
-            key="blok_super_in",
         )
 
         jalankan_btn = st.button(
@@ -749,50 +756,46 @@ elif menu == "5. Super Enkripsi Fleksibel":
         if jalankan_btn:
             if not teks_super:
                 st.warning("Mohon masukkan teks awal terlebih dahulu.")
-            elif not kunci_super:
-                st.warning("Mohon masukkan kunci terlebih dahulu.")
             else:
-                try:
-                    key_stream = int(kunci_super)
-                except ValueError:
-                    st.error("Kunci Universal untuk Stream Cipher harus berupa angka.")
-                    st.stop()
-
                 current_text = teks_super
                 
-                # Jika dekripsi, urutan metode harus dibalik
-                urutan_proses = pilihan_metode if pilihan_aksi == "Enkripsi" else list(reversed(pilihan_metode))
+                # Jika dekripsi, urutan eksekusi dibalik dari belakang ke depan
+                urutan_proses = chain_config if pilihan_aksi == "Enkripsi" else list(reversed(chain_config))
 
-                for idx, metode in enumerate(urutan_proses):
-                    teks_sebelumnya = current_text  # Simpan teks sebelum diproses untuk keperluan visualisasi
+                for idx, item in enumerate(urutan_proses):
+                    metode = item["metode"]
+                    param = item["param"]
+                    teks_sebelumnya = current_text  
                     
                     try:
-                        with st.expander(f"Tahap {idx + 1}: {metode}", expanded=True):
+                        with st.expander(f"Tahap {idx + 1}: {metode} ({pilihan_aksi})", expanded=True):
                             
                             # --------------------------------------------------------
                             # 1. CAESAR CIPHER
                             # --------------------------------------------------------
                             if metode == "Caesar Cipher":
+                                shift_val = int(param["shift"])
                                 if pilihan_aksi == "Enkripsi":
-                                    current_text = encrypt_caesar(current_text, int(geser_super))
+                                    current_text = encrypt_caesar(current_text, shift_val)
                                 else:
-                                    current_text = decrypt_caesar(current_text, int(geser_super))
+                                    current_text = decrypt_caesar(current_text, shift_val)
                                 
                                 st.write(f"Hasil setelah melalui **{metode}**:")
                                 st.code(current_text, language="plaintext")
                                 
                                 st.markdown("**🔍 Detail Proses (Mapping Caesar):**")
-                                mapping = get_caesar_mapping(teks_sebelumnya, int(geser_super), pilihan_aksi)
+                                mapping = get_caesar_mapping(teks_sebelumnya, shift_val, pilihan_aksi)
                                 st.dataframe(pd.DataFrame(mapping), use_container_width=True, hide_index=True)
 
                             # --------------------------------------------------------
                             # 2. RAIL FENCE
                             # --------------------------------------------------------
                             elif metode == "Rail Fence":
+                                rail_val = int(param["rails"])
                                 if pilihan_aksi == "Enkripsi":
-                                    current_text, matriks = encrypt_rail_fence(current_text, int(rail_super))
+                                    current_text, matriks = encrypt_rail_fence(current_text, rail_val)
                                 else:
-                                    current_text, matriks = decrypt_rail_fence(current_text, int(rail_super))
+                                    current_text, matriks = decrypt_rail_fence(current_text, rail_val)
                                 
                                 st.write(f"Hasil setelah melalui **{metode}**:")
                                 st.code(current_text, language="plaintext")
@@ -800,7 +803,7 @@ elif menu == "5. Super Enkripsi Fleksibel":
                                 st.markdown("**🔍 Detail Proses (Matriks Transposisi):**")
                                 df = pd.DataFrame(
                                     matriks,
-                                    index=[f"Rail {i + 1}" for i in range(int(rail_super))],
+                                    index=[f"Rail {i + 1}" for i in range(rail_val)],
                                     columns=[f"P-{i + 1}" for i in range(len(teks_sebelumnya))],
                                 )
                                 styler = df.style
@@ -811,6 +814,7 @@ elif menu == "5. Super Enkripsi Fleksibel":
                             # 3. STREAM CIPHER
                             # --------------------------------------------------------
                             elif metode == "Stream Cipher":
+                                key_stream = int(param["key"])
                                 if pilihan_aksi == "Enkripsi":
                                     current_text, teks_langkah = stream_cipher_encrypt(current_text, key_stream)
                                 else:
@@ -818,7 +822,7 @@ elif menu == "5. Super Enkripsi Fleksibel":
                                 
                                 st.write(f"Hasil setelah melalui **{metode}**:")
                                 st.code(current_text, language="plaintext")
-                                st.info(f"🔍 Diproses menggunakan keystream pseudo-random dengan seed '{key_stream}'.")
+                                st.info(f"🔍 Diproses menggunakan keystream pseudo-random dengan seed '{key_stream}'[cite: 5].")
 
                                 st.markdown(f"**🔍 Detail Proses {metode}:**")
                                 st.code(teks_langkah, language="plaintext")
@@ -827,14 +831,16 @@ elif menu == "5. Super Enkripsi Fleksibel":
                             # 4. BLOCK CIPHER
                             # --------------------------------------------------------
                             elif metode == "Block Cipher":
-                                ukuran = int(blok_super)
+                                kunci_kata = str(param["key"])
+                                ukuran = int(param["block_size"])
+                                
                                 if pilihan_aksi == "Enkripsi":
-                                    current_text, kunci_bytes = block_cipher_encrypt(current_text, kunci_super, ukuran)
+                                    current_text, kunci_bytes = block_cipher_encrypt(current_text, kunci_kata, ukuran)
                                     
                                     st.write(f"Hasil setelah melalui **{metode}**:")
                                     st.code(current_text, language="plaintext")
                                     
-                                    st.markdown(f"**🔍 Detail Proses Enkripsi (Kunci Hex: `{kunci_bytes.hex().upper()}`):**")
+                                    st.markdown(f"**🔍 Detail Proses Enkripsi (Kunci: `{kunci_kata}`, Blok: {ukuran} bytes):**")
                                     text_bytes = teks_sebelumnya.encode('utf-8')
                                     pad_len = ukuran - (len(text_bytes) % ukuran)
                                     padded_data = text_bytes + bytes([pad_len] * pad_len)
@@ -858,12 +864,12 @@ elif menu == "5. Super Enkripsi Fleksibel":
                                             f"Hasl(Hex): {encrypted_b.hex().upper()} | Bin: {bin_hasil}"
                                         )
                                 else:
-                                    current_text, kunci_bytes = block_cipher_decrypt(current_text, kunci_super, ukuran)
+                                    current_text, kunci_bytes = block_cipher_decrypt(current_text, kunci_kata, ukuran)
                                     
                                     st.write(f"Hasil setelah melalui **{metode}**:")
                                     st.code(current_text, language="plaintext")
                                     
-                                    st.markdown(f"**🔍 Detail Proses Dekripsi (Kunci Hex: `{kunci_bytes.hex().upper()}`):**")
+                                    st.markdown(f"**🔍 Detail Proses Dekripsi (Kunci: `{kunci_kata}`, Blok: {ukuran} bytes):**")
                                     ciphertext_bytes = bytes.fromhex(teks_sebelumnya)
                                     for i in range(0, len(ciphertext_bytes), ukuran):
                                         blok = ciphertext_bytes[i:i + ukuran]
