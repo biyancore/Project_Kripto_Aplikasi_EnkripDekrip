@@ -290,7 +290,7 @@ elif menu == "2. Rail Fence":
             "Teks Pesan:",
             placeholder="Masukkan teks yang ingin diproses...",
             key="rail_in",
-        )
+        ).strip()
 
     with col2:
         jumlah_rail = st.number_input(
@@ -339,7 +339,6 @@ elif menu == "2. Rail Fence":
             st.success("✅ Operasi berhasil!")
             st.markdown(f"**{label_hasil}:**")
             
-            # Menggunakan st.code agar muncul ikon copy di pojok kanan atas
             st.code(hasil, language="plaintext")
 
             st.download_button(
@@ -383,6 +382,7 @@ elif menu == "2. Rail Fence":
                         "🔍 Pola zig-zag dibuat terlebih dahulu, kemudian "
                         "cipherteks ditempatkan pada posisi yang sesuai."
                     )
+                    
 
 # ============================================================
 # MENU 3 — Stream Cipher

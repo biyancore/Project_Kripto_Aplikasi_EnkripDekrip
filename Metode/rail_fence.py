@@ -6,6 +6,7 @@
 def encrypt_rail_fence(text, rails):
     if rails <= 1 or not text:
         return text, []
+    
     matrix = [["." for _ in range(len(text))] for _ in range(rails)]
     row, direction = 0, 1
     for col, char in enumerate(text):
@@ -15,6 +16,7 @@ def encrypt_rail_fence(text, rails):
         elif row == rails - 1:
             direction = -1
         row += direction
+        
     ciphertext = "".join(
         ["".join([cell for cell in row if cell != "."]) for row in matrix]
     )
@@ -24,6 +26,11 @@ def encrypt_rail_fence(text, rails):
 def decrypt_rail_fence(ciphertext, rails):
     if rails <= 1 or not ciphertext:
         return ciphertext, []
+    
+    # REVISI UTAMA: Bersihkan spasi/newline ekstra di awal atau akhir string 
+    # yang sering tertinggal saat proses copy-paste teks panjang.
+    ciphertext = ciphertext.strip()
+    
     matrix = [["." for _ in range(len(ciphertext))] for _ in range(rails)]
     row, direction = 0, 1
     for col in range(len(ciphertext)):
