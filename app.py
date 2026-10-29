@@ -339,7 +339,7 @@ elif menu == "2. Rail Fence":
             st.success("✅ Operasi berhasil!")
             st.markdown(f"**{label_hasil}:**")
             
-            st.code(hasil, language="plaintext").strip()
+            st.code(hasil.strip(), language="plaintext")
 
             st.download_button(
                 label="📥 Unduh Hasil TXT",
