@@ -339,7 +339,7 @@ elif menu == "2. Rail Fence":
             st.success("✅ Operasi berhasil!")
             st.markdown(f"**{label_hasil}:**")
             
-            st.code(hasil, language="plaintext")
+            st.code(hasil, language="plaintext").strip()
 
             st.download_button(
                 label="📥 Unduh Hasil TXT",
@@ -382,7 +382,7 @@ elif menu == "2. Rail Fence":
                         "🔍 Pola zig-zag dibuat terlebih dahulu, kemudian "
                         "cipherteks ditempatkan pada posisi yang sesuai."
                     )
-                    
+
 
 # ============================================================
 # MENU 3 — Stream Cipher
